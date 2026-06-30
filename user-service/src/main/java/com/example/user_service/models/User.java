@@ -1,12 +1,13 @@
 package com.example.user_service.models;
 
+import com.example.user_service.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.management.relation.Role;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.UUID;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -38,10 +39,14 @@ public class User implements UserDetails {
 
     private LocalDate createdAt;
 
-
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDate.now();
+    }
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
