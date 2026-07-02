@@ -7,12 +7,12 @@ import com.example.user_service.mapper.UserMapper;
 import com.example.user_service.models.User;
 import com.example.user_service.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,10 +22,9 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public UserResponseDTO findByEmail(String email){
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("Usuário não encontrado."));
-        return userMapper.toDTO(user);
+    public Optional<UserResponseDTO> findByEmail(String email){
+        return userRepository.findByEmail(email)
+                .map(userMapper::toDTO);
     }
 
     public List<UserResponseDTO> findByName(String name) {
@@ -38,6 +37,9 @@ public class UserService {
         User user = (User) auth.getPrincipal();
         if(!passwordEncoder.matches(dto.password(), user.getPassword())){
             throw new RuntimeException("Senha incorreta.");
+        }
+        if(userRepository.existsByEmail(dto.newEmail())){
+            throw new RuntimeException("Email já existente.");
         }
         user.setEmail(dto.newEmail());
         userRepository.save(user);

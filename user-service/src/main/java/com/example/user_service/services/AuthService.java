@@ -1,6 +1,7 @@
 package com.example.user_service.services;
 
 import com.example.user_service.config.TokenProvider;
+import com.example.user_service.dto.AuthDTO;
 import com.example.user_service.dto.TokenResponseDTO;
 import com.example.user_service.dto.UserRequestDTO;
 import com.example.user_service.enums.Role;
@@ -26,7 +27,7 @@ public class AuthService {
     private long expirationTime;
 
 
-    public TokenResponseDTO login(UserRequestDTO dto){
+    public TokenResponseDTO login(AuthDTO dto){
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.email(), dto.password()));
