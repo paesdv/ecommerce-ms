@@ -1,16 +1,19 @@
 package com.example.user_service.controller;
 
 import com.example.user_service.dto.UserResponseDTO;
-import com.example.user_service.dto.changeEmailDTO;
-import com.example.user_service.dto.changePassDTO;
+import com.example.user_service.dto.ChangeEmailDTO;
+import com.example.user_service.dto.ChangePassDTO;
+import com.example.user_service.exceptions.UserNotFoundException;
 import com.example.user_service.services.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
@@ -19,26 +22,26 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping
-    public ResponseEntity<UserResponseDTO> findByEmail(@RequestParam String email){
-        return userService.findByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/by-email")
+    public ResponseEntity<UserResponseDTO> findByEmail(@RequestParam @Email String email) {
+        UserResponseDTO user = userService.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
+        return ResponseEntity.ok(user);
     }
 
-    @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> findByName(@RequestParam String name){
+    @GetMapping("/by-name")
+    public ResponseEntity<List<UserResponseDTO>> findByName(@RequestParam @NotBlank String name){
         return ResponseEntity.ok(userService.findByName(name));
     }
 
     @PostMapping("/change-email")
-    public ResponseEntity<?>changeEmail(@RequestBody changeEmailDTO dto, Authentication authentication){
+    public ResponseEntity<?>changeEmail(@Valid @RequestBody ChangeEmailDTO dto, Authentication authentication){
         userService.changeEmail(authentication, dto);
         return ResponseEntity.ok("Email atualizado com sucesso!");
     }
 
     @PostMapping("/change-pass")
-    public ResponseEntity<?>changePass(@RequestBody changePassDTO dto, Authentication authentication){
+    public ResponseEntity<?>changePass(@Valid @RequestBody ChangePassDTO dto, Authentication authentication){
        userService.changePassword(authentication, dto);
        return ResponseEntity.ok("Senha atualizada com sucesso!");
     }

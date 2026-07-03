@@ -5,6 +5,7 @@ import com.example.user_service.dto.AuthDTO;
 import com.example.user_service.dto.TokenResponseDTO;
 import com.example.user_service.dto.UserRequestDTO;
 import com.example.user_service.enums.Role;
+import com.example.user_service.exceptions.EmailAlreadyInUseException;
 import com.example.user_service.models.User;
 import com.example.user_service.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class AuthService {
 
     public void register(UserRequestDTO dto){
         if(userRepository.findByEmail(dto.email()).isPresent()){
-            throw new RuntimeException("Email já cadastrado");
+            throw new EmailAlreadyInUseException("Email já cadastrado");
         }
 
         User user = User.builder()

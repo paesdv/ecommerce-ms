@@ -1,8 +1,10 @@
 package com.example.user_service.services;
 
 import com.example.user_service.dto.UserResponseDTO;
-import com.example.user_service.dto.changeEmailDTO;
-import com.example.user_service.dto.changePassDTO;
+import com.example.user_service.dto.ChangeEmailDTO;
+import com.example.user_service.dto.ChangePassDTO;
+import com.example.user_service.exceptions.EmailAlreadyInUseException;
+import com.example.user_service.exceptions.InvalidCredentialsException;
 import com.example.user_service.mapper.UserMapper;
 import com.example.user_service.models.User;
 import com.example.user_service.repository.UsersRepository;
@@ -33,25 +35,33 @@ public class UserService {
                 .toList();
     }
 
-    public void changeEmail(Authentication auth, changeEmailDTO dto) {
-        User user = (User) auth.getPrincipal();
-        if(!passwordEncoder.matches(dto.password(), user.getPassword())){
-            throw new RuntimeException("Senha incorreta.");
-        }
+    public void changeEmail(Authentication auth, ChangeEmailDTO dto) {
+        User user = getAuthenticatedUser(auth);
+        validatePassword(dto.password(), user);
+
         if(userRepository.existsByEmail(dto.newEmail())){
-            throw new RuntimeException("Email já existente.");
+            throw new EmailAlreadyInUseException("Email já existente!");
         }
         user.setEmail(dto.newEmail());
         userRepository.save(user);
     }
 
-    public void changePassword(Authentication auth, changePassDTO dto) {
-        User user = (User) auth.getPrincipal();
-        if(!passwordEncoder.matches(dto.currentPassword(), user.getPassword())){
-            throw new RuntimeException("Senha incorreta.");
-        }
+    public void changePassword(Authentication auth, ChangePassDTO dto) {
+        User user = getAuthenticatedUser(auth);
+        validatePassword(dto.currentPassword(), user);
+
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
         userRepository.save(user);
+    }
+
+    private void validatePassword(String rawPassword, User user){
+        if(!passwordEncoder.matches(rawPassword, user.getPassword())){
+            throw new InvalidCredentialsException("Senha incorreta.");
+        }
+    }
+
+    private User getAuthenticatedUser(Authentication auth){
+        return (User) auth.getPrincipal();
     }
 
 
