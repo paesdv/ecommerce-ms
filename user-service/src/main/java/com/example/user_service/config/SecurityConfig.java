@@ -38,11 +38,9 @@ public class SecurityConfig {
                             response.setStatus(HttpStatus.FORBIDDEN.value());
                         }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/v1/produto/**").permitAll()
-                        .requestMatchers("/v1/produto/**").authenticated()
-                        .requestMatchers("/v1/usuario/troca-email").authenticated()
-                        .requestMatchers("/v1/auth/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/user/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
