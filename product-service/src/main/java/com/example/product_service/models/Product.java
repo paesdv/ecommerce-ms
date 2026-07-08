@@ -32,9 +32,12 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private Category category;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @CreationTimestamp
     private LocalDateTime creationDate;
-    
+
     @UpdateTimestamp
     private LocalDateTime updateDate;
 
